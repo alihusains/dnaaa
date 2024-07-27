@@ -26,6 +26,9 @@ jobs:
           DEPLOYMENT_ID_2: ${{ secrets.DEPLOYMENT_ID_2 }}  # Add more if needed
         run: python update_db.py
 
+      - name: Install jq
+        run: sudo apt-get install -y jq
+
       - name: Commit and push changes
         run: |
           git config --global user.name 'github-actions[bot]'
@@ -34,6 +37,7 @@ jobs:
           if ! git diff --cached --quiet; then
             git commit -m "Update database and version"
             git push
+          fi
 
       - name: Get version
         id: get_version
