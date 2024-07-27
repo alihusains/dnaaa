@@ -37,14 +37,16 @@ jobs:
           if ! git diff --cached --quiet; then
             git commit -m "Update database and version"
             git push
-          fi
 
       - name: Get version
         id: get_version
         run: echo "DB_VERSION=$(jq -r .version db_version.json)" >> $GITHUB_ENV
 
+      - name: Debug DB_VERSION
+        run: echo "DB_VERSION=${{ env.DB_VERSION }}"
+
       - name: Create Release
-        if: steps.get_version.outputs.DB_VERSION != ''
+        if: ${{ env.DB_VERSION != '' }}
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -56,9 +58,9 @@ jobs:
           files: database/database.db
 
       - name: Clear jsDelivr cache
-        if: steps.get_version.outputs.DB_VERSION != ''
+        if: ${{ env.DB_VERSION != '' }}
         uses: egad13/purge-jsdelivr-cache@v1
         with:
-          path: /gh/OWNER/REPO@latest/database/database.db
+          path: /gh/alihusains/dnaaa@latest/database/database.db
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
