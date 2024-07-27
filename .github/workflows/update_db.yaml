@@ -1,0 +1,60 @@
+name: Update Database
+
+on:
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  update_db:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Run update_db.py
+        env:
+          DEPLOYMENT_ID_1: ${{ secrets.DEPLOYMENT_ID_1 }}
+          DEPLOYMENT_ID_2: ${{ secrets.DEPLOYMENT_ID_2 }}  # Add more if needed
+        run: python update_db.py
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add .
+          if ! git diff --cached --quiet; then
+            git commit -m "Update database and version"
+            git push
+
+      - name: Get version
+        id: get_version
+        run: echo "DB_VERSION=$(jq -r .version db_version.json)" >> $GITHUB_ENV
+
+      - name: Create Release
+        if: steps.get_version.outputs.DB_VERSION != ''
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ env.DB_VERSION }}
+          release_name: Database version ${{ env.DB_VERSION }}
+          draft: false
+          prerelease: false
+          files: database/database.db
+
+      - name: Clear jsDelivr cache
+        if: steps.get_version.outputs.DB_VERSION != ''
+        uses: egad13/purge-jsdelivr-cache@v1
+        with:
+          path: /gh/OWNER/REPO@latest/database/database.db
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
