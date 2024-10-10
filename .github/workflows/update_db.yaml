@@ -135,6 +135,77 @@
 #           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
+# name: Update Database
+
+# on:
+#   workflow_dispatch:  # Allow manual triggering
+
+# jobs:
+#   update_db:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v2
+
+#       - name: Set up Python
+#         uses: actions/setup-python@v2
+#         with:
+#           python-version: 3.8
+
+#       - name: Install dependencies
+#         run: |
+#           python -m pip install --upgrade pip
+#           pip install requests
+
+#       - name: Run update_db.py
+#         env:
+#           DEPLOYMENT_ID_1: ${{ secrets.DEPLOYMENT_ID_1 }}
+#           DEPLOYMENT_ID_2: ${{ secrets.DEPLOYMENT_ID_2 }}  # Add more if needed
+#         run: python update_db.py
+
+#       - name: Install jq
+#         run: sudo apt-get install -y jq
+
+#       - name: Commit and push changes
+#         run: |
+#           git config --global user.name 'github-actions[bot]'
+#           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+#           git add .
+#           git diff --cached --quiet || (git commit -m "Update database and version" && git push)
+
+#       - name: Get version
+#         id: get_version
+#         run: echo "DB_VERSION=$(jq -r .version db_version.json)" >> $GITHUB_ENV
+
+#       - name: Debug DB_VERSION
+#         run: echo "DB_VERSION=${{ env.DB_VERSION }}"
+
+#       - name: Create Release
+#         if: ${{ env.DB_VERSION != '' }}
+#         id: create_release  # Setting ID for this step to capture output
+#         uses: actions/create-release@v1
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#         with:
+#           tag_name: v${{ env.DB_VERSION }}
+#           release_name: Database version ${{ env.DB_VERSION }}
+#           draft: false
+#           prerelease: false
+
+#       - name: Clear jsDelivr cache
+#         if: ${{ env.DB_VERSION != '' }}
+#         uses: egad13/purge-jsdelivr-cache@v1
+#         with:
+#           url: |
+#             https://cdn.jsdelivr.net/gh/alihusains/dnaaa@latest/database/database.db
+#             https://cdn.jsdelivr.net/gh/alihusains/dnaaa@latest/database/database.sqlite
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }} 
+
+
+
+
+
 name: Update Database
 
 on:
@@ -180,9 +251,20 @@ jobs:
       - name: Debug DB_VERSION
         run: echo "DB_VERSION=${{ env.DB_VERSION }}"
 
+      - name: Check if tag exists
+        id: check_tag
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const tags = await github.repos.listTags({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+            const tagExists = tags.data.some(tag => tag.name === `v${process.env.DB_VERSION}`);
+            core.setOutput('tag_exists', tagExists);
+
       - name: Create Release
-        if: ${{ env.DB_VERSION != '' }}
-        id: create_release  # Setting ID for this step to capture output
+        if: steps.check_tag.outputs.tag_exists == 'false'  # Only create release if the tag doesn't exist
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -192,31 +274,11 @@ jobs:
           draft: false
           prerelease: false
 
-      # - name: Upload .db file to release
-      #   if: ${{ env.DB_VERSION != '' }}
-      #   uses: actions/upload-release-asset@v1
-      #   with:
-      #     upload_url: ${{ steps.create_release.outputs.upload_url }}  # Corrected reference to the release URL
-      #     asset_path: database/database.db
-      #     asset_name: database.db
-      #     asset_content_type: application/octet-stream
-
-      # - name: Upload .sqlite file to release
-      #   if: ${{ env.DB_VERSION != '' }}
-      #   uses: actions/upload-release-asset@v1
-      #   with:
-      #     upload_url: ${{ steps.create_release.outputs.upload_url }}  # Corrected reference to the release URL
-      #     asset_path: database/database.sqlite
-      #     asset_name: database.sqlite
-      #     asset_content_type: application/octet-stream
-
       - name: Clear jsDelivr cache
         if: ${{ env.DB_VERSION != '' }}
         uses: egad13/purge-jsdelivr-cache@v1
         with:
-          url: |
-            https://cdn.jsdelivr.net/gh/alihusains/dnaaa@latest/database/database.db
-            https://cdn.jsdelivr.net/gh/alihusains/dnaaa@latest/database/database.sqlite
+          url: https://cdn.jsdelivr.net/gh/alihusains/dnaaa@latest/database/database.db
         env:
-          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }} 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
