@@ -135,9 +135,6 @@
 #           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
-
-
-
 name: Update Database
 
 on:
@@ -185,6 +182,7 @@ jobs:
 
       - name: Create Release
         if: ${{ env.DB_VERSION != '' }}
+        id: create_release  # Setting ID for this step to capture output
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -198,8 +196,8 @@ jobs:
         if: ${{ env.DB_VERSION != '' }}
         uses: actions/upload-release-asset@v1
         with:
-          upload_url: ${{ steps.get_version.outputs.upload_url }}  # Get the release URL
-          asset_path: database/database.db  # Specify the .db file path
+          upload_url: ${{ steps.create_release.outputs.upload_url }}  # Corrected reference to the release URL
+          asset_path: database/database.db
           asset_name: database.db
           asset_content_type: application/octet-stream
 
@@ -207,8 +205,8 @@ jobs:
         if: ${{ env.DB_VERSION != '' }}
         uses: actions/upload-release-asset@v1
         with:
-          upload_url: ${{ steps.get_version.outputs.upload_url }}
-          asset_path: database/database.sqlite  # Specify the .sqlite file path
+          upload_url: ${{ steps.create_release.outputs.upload_url }}  # Corrected reference to the release URL
+          asset_path: database/database.sqlite
           asset_name: database.sqlite
           asset_content_type: application/octet-stream
 
