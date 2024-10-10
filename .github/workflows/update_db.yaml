@@ -192,23 +192,23 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Upload .db file to release
-        if: ${{ env.DB_VERSION != '' }}
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}  # Corrected reference to the release URL
-          asset_path: database/database.db
-          asset_name: database.db
-          asset_content_type: application/octet-stream
+      # - name: Upload .db file to release
+      #   if: ${{ env.DB_VERSION != '' }}
+      #   uses: actions/upload-release-asset@v1
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}  # Corrected reference to the release URL
+      #     asset_path: database/database.db
+      #     asset_name: database.db
+      #     asset_content_type: application/octet-stream
 
-      - name: Upload .sqlite file to release
-        if: ${{ env.DB_VERSION != '' }}
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}  # Corrected reference to the release URL
-          asset_path: database/database.sqlite
-          asset_name: database.sqlite
-          asset_content_type: application/octet-stream
+      # - name: Upload .sqlite file to release
+      #   if: ${{ env.DB_VERSION != '' }}
+      #   uses: actions/upload-release-asset@v1
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}  # Corrected reference to the release URL
+      #     asset_path: database/database.sqlite
+      #     asset_name: database.sqlite
+      #     asset_content_type: application/octet-stream
 
       - name: Clear jsDelivr cache
         if: ${{ env.DB_VERSION != '' }}
