@@ -279,6 +279,6 @@ jobs:
         if: ${{ env.DB_VERSION != '' }}
         uses: egad13/purge-jsdelivr-cache@v1
         with:
-          url: https://cdn.jsdelivr.net/gh/alihusains/dnaaa@latest/database/database.db
+          url: https://cdn.jsdelivr.net/gh/alihusains/dnaaa@latest/database/database.sqlite
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
