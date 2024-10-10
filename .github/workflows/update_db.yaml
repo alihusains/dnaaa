@@ -256,15 +256,16 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const tags = await github.repos.listTags({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
+            const { owner, repo } = context.repo;
+            const tags = await github.rest.repos.listTags({
+              owner,
+              repo,
             });
             const tagExists = tags.data.some(tag => tag.name === `v${process.env.DB_VERSION}`);
-            core.setOutput('tag_exists', tagExists);
+            return tagExists;
 
       - name: Create Release
-        if: steps.check_tag.outputs.tag_exists == 'false'  # Only create release if the tag doesn't exist
+        if: steps.check_tag.outputs.result == 'false'  # Only create release if the tag doesn't exist
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -281,4 +282,3 @@ jobs:
           url: https://cdn.jsdelivr.net/gh/alihusains/dnaaa@latest/database/database.db
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
