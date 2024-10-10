@@ -218,5 +218,5 @@ jobs:
             https://cdn.jsdelivr.net/gh/alihusains/dnaaa@latest/database/database.db
             https://cdn.jsdelivr.net/gh/alihusains/dnaaa@latest/database/database.sqlite
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }} 
 
