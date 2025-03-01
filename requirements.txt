@@ -1,4 +1,3 @@
 DEPLOYMENT_ID_1,v2
 DEPLOYMENT_ID_2,events
-DEPLOYMENT_ID_1,htmlsettings
 DEPLOYMENT_ID_2,guj_translation
